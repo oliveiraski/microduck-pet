@@ -277,6 +277,7 @@ function watchHere() {
 }
 
 function next() {
+  lazy = false
   if (watching) return goWatch()
   const bored = (performance.now() - lastTouch) / 1000
   // so cochila depois de muito tempo largado, e raramente
@@ -285,21 +286,21 @@ function next() {
   // com musica ele continua fazendo as coisas dele (de fone), so danca mais vezes
   if (music && Math.random() < 0.15) return dance()
   const r = Math.random()
-  if (r < 0.04) return portal() || wander()
-  if (r < 0.28) return wander()
-  if (r < 0.52) {
+  if (r < 0.03) return portal() || wander()
+  if (r < 0.15) return wander()
+  if (r < 0.25) {
     const p = findPlan()
     if (p) return walkTo(p.from, p)
     return wander()
   }
-  if (r < 0.58) return go('sit', { dur: rnd(4, 9) })
-  if (r < 0.62) return quack(false)
-  if (r < 0.66) return dance()
-  if (r < 0.69) return flip()
-  if (r < 0.72) return spin()
-  if (r < 0.74) return hero(pick(HERO_KINDS)) || wander()
-  if (r < 0.87) return scene(pick(KINDS)) || wander()
-  go('idle', { dur: rnd(1.5, 4) })
+  if (r < 0.30) return go('sit', { dur: rnd(4, 9) })
+  if (r < 0.32) return quack(false)
+  if (r < 0.34) return flip()
+  if (r < 0.36) return spin()
+  if (r < 0.38) return hero(pick(HERO_KINDS)) || wander()
+  if (r < 0.45) return scene(pick(KINDS)) || wander()
+  // no resto do tempo vai pro canto e fica de boa no pc, na rede etc
+  chill()
 }
 
 // chegou no fim do chao atual
@@ -637,11 +638,13 @@ function puff(x, y) { parts.push({ kind: 'puff', t: 0, x: CX + x, y: GY + y }) }
 function puffs() { puff(-14, -10); puff(0, -18); puff(14, -10) }
 
 function scene(kind) {
-  if (drag || AIR.has(st.name)) return false
+  if (drag || AIR.has(st.name)) { lazy = false; return false }
   if (kind === 'ride' || kind === 'skate') return ride(kind === 'ride' ? 'horse' : 'skate')
   if (!room(ROOM[kind] || EXTRA[kind].room)) return false
   parts = []
-  go('scene', { kind, dur: EXTRA[kind] ? rnd(18, 35) : rnd(25, 50), k: 0 })
+  const dur = lazy ? rnd(60, 150) : EXTRA[kind] ? rnd(18, 35) : rnd(25, 50)
+  lazy = false
+  go('scene', { kind, dur, k: 0 })
   return true
 }
 
@@ -1050,10 +1053,48 @@ function sceneSpot(kind) {
 function goDo(kind) {
   const s = sceneSpot(kind)
   if (!s) return quack(true)
+  goTo(s, kind) || quack(true)
+}
+
+// anda ate o lugar (ou vai de portal se for longe) e faz a cena
+function goTo(s, kind) {
   const cur = supportAt(ax, ay, sup && sup.id)
+  if (cur && Math.abs(s.x - ax) < 30 && Math.abs(cur.y - s.y) < 2) return scene(kind)
   const clear = !world.solids.some(b => b.x < Math.max(ax, s.x) && b.x + b.w > Math.min(ax, s.x) && b.y < s.y)
-  if (cur && cur.kind === 'floor' && Math.abs(cur.y - s.y) < 2 && Math.abs(s.x - ax) < 500 && clear) return walkTo(s.x, { kind: 'scene', what: kind })
-  if (!portal(s, kind)) quack(true)
+  if (cur && cur.kind === 'floor' && Math.abs(cur.y - s.y) < 2 && Math.abs(s.x - ax) < 700 && clear) { walkTo(s.x, { kind: 'scene', what: kind }); return true }
+  return portal(s, kind)
+}
+
+// coisas paradas pra ficar no canto
+const CHILL = ['work', 'work', 'work', 'hammock', 'hammock', 'hammock', 'book', 'beach', 'guitar', 'paint', 'fishing', 'plant']
+let lazy = false
+
+// lugar livre perto de um dos cantos de cada chao
+function cornerSpot(w) {
+  const fl = freeFloors().length ? freeFloors() : floors()
+  const out = []
+  for (const f of fl) {
+    for (const side of [1, -1]) {
+      for (let i = 0; i < 12; i++) {
+        const x = side > 0 ? f.x1 + w + 10 + i * 20 : f.x2 - w - 10 - i * 20
+        if (x - w < f.x1 || x + w > f.x2) break
+        if (world.solids.some(b => b.x < x + w + 10 && b.x + b.w > x - w - 10 && b.y < f.y && b.y + b.h > f.y - 90)) continue
+        out.push({ id: f.id, x, y: f.y, d: Math.abs(x - ax) + Math.abs(f.y - ay) * 3 })
+        break
+      }
+    }
+  }
+  out.sort((a, b) => a.d - b.d)
+  return out.length ? out[Math.random() < 0.7 ? 0 : Math.floor(Math.random() * out.length)] : null
+}
+
+function chill() {
+  const kind = pick(CHILL)
+  const s = cornerSpot(ROOM[kind] || EXTRA[kind].room)
+  lazy = true
+  if (s && goTo(s, kind)) return
+  lazy = false
+  wander()
 }
 
 // ---- portal: abre um portal verde na frente, entra e sai em outro lugar ----
