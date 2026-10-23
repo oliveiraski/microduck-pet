@@ -3,6 +3,9 @@ const path = require('path')
 const { spawn } = require('child_process')
 const wins = require('./wins')
 
+// janelinha de 160px, renderizar na cpu sai mais barato que manter o processo da gpu
+app.disableHardwareAcceleration()
+
 // 80x76 pixels logicos * 2
 const W = 160, H = 152
 // espaco livre que o pato precisa em cima de uma plataforma
@@ -191,7 +194,7 @@ function busyDisplays(video) {
 }
 
 function tick() {
-  if (Date.now() - iconAt > 1000) {
+  if (Date.now() - iconAt > 3000) {
     iconAt = Date.now()
     try { iconRects = wins.icons() } catch (_) { iconRects = [] }
   }
@@ -279,7 +282,7 @@ ipcMain.on('icon', (_e, url, theme) => {
 app.whenReady().then(() => {
   createWindow()
   startTaskbarReader()
-  setInterval(tick, 120)
+  setInterval(tick, 250)
   // widget "sempre no topo" pode ficar na frente dele, entao traz a janela pra frente de vez em quando
   setInterval(() => { if (win && !win.isDestroyed()) win.moveTop() }, 1500)
 })

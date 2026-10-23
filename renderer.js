@@ -1725,7 +1725,7 @@ pet.onWatch(v => {
 
 let lastT = 0, sent = ''
 function loop(now) {
-  const dt = Math.min(0.05, (now - lastT) / 1000)
+  const dt = Math.min(0.1, (now - lastT) / 1000)
   lastT = now
   tickBlink(dt)
   pollDrag()
@@ -1733,8 +1733,11 @@ function loop(now) {
   const p = draw()
   const k = p.x + ',' + p.y
   if (k !== sent) { sent = k; lastWin = p; pet.move(p.x, p.y) }
-  requestAnimationFrame(loop)
+  // pixel art n precisa de 144fps: 30 andando, 12 parado
+  const fps = drag ? 60 : CALM.has(st.name) ? 12 : 30
+  setTimeout(() => loop(performance.now()), Math.max(1, 1000 / fps - (performance.now() - now)))
 }
+const CALM = new Set(['scene', 'watch', 'sleep', 'sit', 'idle'])
 
 pet.info().then(info => {
   world = info.world
@@ -1753,5 +1756,5 @@ pet.info().then(info => {
   if (f) stand(f)
   lastWin = { x: info.x, y: info.y }
   lastT = performance.now()
-  requestAnimationFrame(loop)
+  loop(lastT)
 })

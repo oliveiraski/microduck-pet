@@ -60,5 +60,5 @@ while ($true) {
   [Console]::Out.WriteLine('{"tb":[' + ($tb -join ',') + '],"media":[' + ($media -join ',') + '],"audio":[' + ($audio -join ',') + ']}')
   [Console]::Out.Flush()
   $n++
-  Start-Sleep -Seconds 2
+  Start-Sleep -Seconds 3
 }
