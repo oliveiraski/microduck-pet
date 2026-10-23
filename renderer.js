@@ -297,8 +297,8 @@ function next() {
   if (r < 0.66) return dance()
   if (r < 0.69) return flip()
   if (r < 0.72) return spin()
-  if (r < 0.80) return hero(pick(HERO_KINDS)) || wander()
-  if (r < 0.93) return scene(pick(KINDS)) || wander()
+  if (r < 0.74) return hero(pick(HERO_KINDS)) || wander()
+  if (r < 0.87) return scene(pick(KINDS)) || wander()
   go('idle', { dur: rnd(1.5, 4) })
 }
 
