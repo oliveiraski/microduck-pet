@@ -1,0 +1,16 @@
+{
+  "name": "microduck-pet",
+  "version": "0.1.0",
+  "description": "microduck em pixel art andando pela area de trabalho",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^45.0.0"
+  },
+  "dependencies": {
+    "koffi": "^3.3.3"
+  }
+}
