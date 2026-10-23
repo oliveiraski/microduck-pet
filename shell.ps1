@@ -1,5 +1,7 @@
 # botoes da barra de tarefas (a do win11 eh xaml, so da pra ler por ui automation)
 # o que ta tocando (app + titulo) e quem ta soltando som. solta uma linha json a cada 2s
+# sem isso os acentos do titulo chegam quebrados e nao batem com a janela
+[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
 Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes, System.Runtime.WindowsRuntime
 Add-Type -Path (Join-Path $PSScriptRoot 'audio.cs')
 Add-Type -Namespace Pet -Name Dpi -MemberDefinition '[DllImport("user32.dll")] public static extern bool SetProcessDpiAwarenessContext(IntPtr v);'

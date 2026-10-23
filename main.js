@@ -214,8 +214,9 @@ function tick() {
 function startTaskbarReader() {
   ps = spawn('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', path.join(__dirname, 'shell.ps1')], { windowsHide: true })
   let buf = ''
+  ps.stdout.setEncoding('utf8')
   ps.stdout.on('data', (d) => {
-    buf += d.toString()
+    buf += d
     let i
     while ((i = buf.indexOf('\n')) >= 0) {
       const line = buf.slice(0, i).trim()

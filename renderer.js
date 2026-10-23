@@ -263,6 +263,12 @@ function watchSpot() {
 function goWatch() {
   const cur = supportAt(ax, ay, sup && sup.id)
   if (!cur) return watchHere()
+  // longe do lugar (outro monitor): vai de portal em vez de atravessar tudo andando
+  const tx = watching && watchSpot()
+  if (tx != null && tx !== false && Math.abs(tx - ax) > 500) {
+    const f = floors().find(f => tx >= f.x1 && tx < f.x2)
+    if (f && portal({ id: f.id, x: tx, y: f.y })) return
+  }
   // em cima de janela/icone: pula pra baixo (o +2 eh pra nao pousar no mesmo lugar)
   if ((cur.kind === 'win' || cur.kind === 'icon') && below(ax, ay)) { ay += 2; return dropOff(face * 40) }
   const x = watching && watchSpot()
