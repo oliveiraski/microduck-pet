@@ -1733,11 +1733,10 @@ function loop(now) {
   const p = draw()
   const k = p.x + ',' + p.y
   if (k !== sent) { sent = k; lastWin = p; pet.move(p.x, p.y) }
-  // pixel art n precisa de 144fps: 30 andando, 12 parado
-  const fps = drag ? 60 : CALM.has(st.name) ? 12 : 30
+  // trava em 60, nao precisa ir na taxa do monitor (144)
+  const fps = 60
   setTimeout(() => loop(performance.now()), Math.max(1, 1000 / fps - (performance.now() - now)))
 }
-const CALM = new Set(['scene', 'watch', 'sleep', 'sit', 'idle'])
 
 pet.info().then(info => {
   world = info.world
